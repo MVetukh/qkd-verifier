@@ -1,0 +1,7 @@
+DIGEST a1e3b8e81c0390f376c4f5eeaea911d7
+FDummy
+mod 76:80 <> Dummy
+prf 93:104 Dummy one_plus_one
+R113:115 Coq.Init.Logic <> ::type_scope:x_'='_x not
+R109:111 Coq.Init.Peano <> ::nat_scope:x_'+'_x not
+R150:154 Dummy Dummy <> mod

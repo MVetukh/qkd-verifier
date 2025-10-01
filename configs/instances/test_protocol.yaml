@@ -1,0 +1,6 @@
+# configs/instances/test_protocol.yaml
+name: "test_protocol"
+parameters:
+  qubits: 1000
+  error_rate: 0.01
+  security_parameter: 1e-6
