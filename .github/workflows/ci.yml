@@ -3,25 +3,33 @@ name: QKD Verification CI
 on: [push, pull_request]
 
 jobs:
-  verify:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4 # Updated to a newer version for better reliability
-
-      - name: Set up Coq
-        run: sudo apt-get update && sudo apt-get install -y coq
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.8'
-
-      - name: Install Python Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e .[dev]
-
-      - name: Run Coq verification
-        run: |
-          make coq
-          make pipeline PYTHON=python3
+    verify:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+      
+        - name: Set up Coq
+          run: sudo apt-get update && sudo apt-get install -y coq
+      
+        - name: Set up Python
+          uses: actions/setup-python@v4
+          with:
+            python-version: '3.8'
+          
+        - name: Install build deps (system)
+          run: sudo apt-get update && sudo apt-get install -y build-essential libblas-dev liblapack-dev
+          
+        - name: Install Python Dependencies
+          run: |
+            python -m pip install --upgrade pip setuptools wheel build
+            pip install -e ".[dev]" || \
+            (echo "Editable install failed — trying fallback requirements" && \
+             test -f requirements.txt && pip install -r requirements.txt || true && \
+             test -f requirements-dev.txt && pip install -r requirements-dev.txt || true)
+          
+        - name: Run Coq verification
+          run: |
+            make Makefile.coq
+            make -C coq -f Makefile.coq
+            # your pipeline step (adjust invocation)
+            make pipeline PYTHON=python3
