@@ -29,7 +29,16 @@ jobs:
           
         - name: Run Coq verification
           run: |
-            make Makefile.coq
-            make -C coq -f Makefile.coq
-            # your pipeline step (adjust invocation)
-            make pipeline PYTHON=python3
+            # Переходим в директорию с Coq проектом
+            cd coq
+            # Проверяем, что _CoqProject на месте
+            if [ ! -f "_CoqProject" ]; then
+                echo "Error: _CoqProject not found in coq/"
+                exit 1
+            fi
+            # Генерируем Makefile.coq
+            coq_makefile -f _CoqProject -o Makefile.coq
+            # Проверяем, что файл создался
+            ls -la Makefile.coq
+            # Собираем проект
+            make -f Makefile.coq
