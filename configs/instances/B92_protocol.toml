@@ -1,0 +1,143 @@
+# B92 protocol instance (example)
+# Fields:
+#  - protocol: name
+#  - parameters: global run parameters
+#  - states: ensemble of signal states (complex vectors)
+#  - measurements: Bob's measurement operators (POVMs) or projectors
+#  - device: optional device model (loss, dark counts, detector model)
+#  - postprocessing: sifting, test fraction, EC/PA settings
+#  - observed: example observed statistics (for tests / demo)
+#  - security_goal: what final quantity to produce
+
+[protocol]
+name = "B92"
+description = "Simple B92 instance with two nonorthogonal states"
+
+[parameters]
+# total number of signals sent (raw)
+N = 100000
+# probability to choose a signal state (if asymmetric); here equal
+p_psi0 = 0.5
+p_psi1 = 0.5
+# fraction of rounds used for parameter estimation (test)
+test_fraction = 0.10
+# finite-size security margin to add to statistical bounds
+statistical_margin = 1e-3
+# seed length (bits) reserved for privacy amplification seed
+pa_seed_length = 128
+
+#
+# --- States: ensemble entries ---
+# vec: ket components in computational basis as complex numbers {re, im}
+# p: prior probability of preparation
+#
+[[states]]
+label = "psi0"
+p = 0.5
+# example: |ψ0> = |0>  (computational basis)
+vec = [
+  { re = 1.0, im = 0.0 },
+  { re = 0.0, im = 0.0 }
+]
+
+[[states]]
+label = "psi1"
+p = 0.5
+# example: |ψ1> = cos(theta)|0> + sin(theta)|1>, theta = 30 degrees
+# cos(30°) ≈ 0.8660254, sin(30°) = 0.5
+vec = [
+  { re = 0.8660254037844386, im = 0.0 },
+  { re = 0.5, im = 0.0 }
+]
+
+#
+# --- Measurements ---
+# We describe Bob's measurement as a list of POVM elements.
+# Each POVM element is a matrix (array of rows), row entries are complex numbers {re,im}.
+#
+# For B92 one typical choice is an unambiguous state discrimination (USD) POVM:
+# M0: detects psi0, M1: detects psi1, M? (inconclusive)
+#
+[[measurements.povm]]
+label = "M0"   # click "psi0"
+matrix = [
+  [ { re = 0.25, im = 0.0 }, { re = 0.0, im = 0.0 } ],
+  [ { re = 0.0, im = 0.0 },  { re = 0.0, im = 0.0 } ]
+]
+
+[[measurements.povm]]
+label = "M1"   # click "psi1"
+matrix = [
+  [ { re = 0.0, im = 0.0 }, { re = 0.0, im = 0.0 } ],
+  [ { re = 0.0, im = 0.0 }, { re = 0.25, im = 0.0 } ]
+]
+
+[[measurements.povm]]
+label = "Minc" # inconclusive outcome
+matrix = [
+  [ { re = 0.75, im = 0.0 }, { re = 0.0, im = 0.0 } ],
+  [ { re = 0.0, im = 0.0 },  { re = 0.75, im = 0.0 } ]
+]
+
+[measurements]
+# convention for parser: normalize POVM to ensure sum(M_i) = I (checked/normalized by parser)
+normalize = true
+
+#
+# --- Device model (optional) ---
+[device]
+# transmissivity (channel loss) 0..1
+eta = 0.9
+# detector dark count rate per gate
+dark_count = 1e-6
+# if detector model is nonideal, parser may need extra fields (efficiency mismatch etc.)
+detector_efficiency = 0.85
+
+#
+# --- Postprocessing & Error Correction / Privacy Amplification ---
+[postprocessing]
+# sifting rule for B92: keep only conclusive detection outcomes (M0 or M1)
+sifting = "conclusive_only"
+# error correction scheme parameters (syndrome length r or target leak rate)
+error_correction:
+  # choice: "shannon", "ldpc", "cascade"
+  scheme = "ldpc"
+  # if using LDPC, target frame error rate after decoding
+  target_ferr = 1e-6
+  # assumed EC inefficiency above Shannon (f * H)
+  inefficiency_f = 1.1
+
+# privacy amplification parameters
+[postprocessing.privacy_amplification]
+method = "universal_hash"   # universal 2 hashing
+hash_family = "toeplitz"
+security_parameter = 1e-10
+
+#
+# --- Observed statistics (example values for a run) ---
+[observed]
+# measured fraction of conclusive rounds (after sifting)
+p_conclusive = 0.35
+# measured bit error rate on conclusive rounds
+error_rate_conclusive = 0.015
+# measured fraction of inconclusive rounds
+p_inconclusive = 0.65
+
+#
+# --- Security goal ---
+[security_goal]
+# produce: key_length (in bits) OR key_rate (per raw signal)
+output = "key_length"
+# desired composable security epsilon
+epsilon = 1e-9
+# final formula hint for generator (informational)
+# example: L = N_conclusive * (1 - h(delta_ph)) - leak_EC - 2*log2(1/epsilon)
+formula_hint = "L = N_concl*(1 - h(delta_ph)) - leak_EC - 2*log2(1/eps)"
+
+#
+# Metadata
+[meta]
+author = "MaxV"
+email = "m.vetux@yandex.ru"
+date = "2025-10-02"
+notes = "Example B92 instance with theta=30deg. Adjust states/POVM to model concrete hardware."
