@@ -32,24 +32,21 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
 
-      # Генерация Coq-файла и сертификата
       - name: Generate Coq instance (b92_inst.v + certificate.json)
         run: |
           make gen
           test -f coq/Generated/b92_inst.v
 
-      # Юнит-тест генератора (pytest)
-      - name: Python tests (generator smoke test)
-        run: |
-          PYTHONPATH=. pytest -q
-
-      # Быстрая компиляция одного файла без Makefile.coq
       - name: Quick-compile generated Coq file
         run: |
           make coq-quick
-
-      # Полная сборка через coq_makefile (опционально)
+      
       - name: Full Coq build (optional)
         run: |
           test -f coq/_CoqProject
           make coq
+
+            # Юнит-тест генератора (pytest)
+      - name: Python tests (generator smoke test)
+        run: |
+          PYTHONPATH=. pytest -q
