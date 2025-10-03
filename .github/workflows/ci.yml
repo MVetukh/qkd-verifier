@@ -25,28 +25,31 @@ jobs:
       - name: Install system deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y coq coqmake build-essential libblas-dev liblapack-dev
+          sudo apt-get install -y coq build-essential libblas-dev liblapack-dev
 
       - name: Install Python deps (editable)
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
 
+      # Генерация Coq-файла и сертификата
       - name: Generate Coq instance (b92_inst.v + certificate.json)
         run: |
           make gen
           test -f coq/Generated/b92_inst.v
 
+      # Юнит-тест генератора (pytest)
       - name: Python tests (generator smoke test)
         run: |
           pytest -q
 
+      # Быстрая компиляция одного файла без Makefile.coq
       - name: Quick-compile generated Coq file
         run: |
           make coq-quick
 
+      # Полная сборка через coq_makefile (опционально)
       - name: Full Coq build (optional)
         run: |
-          # убедимся, что _CoqProject существует
           test -f coq/_CoqProject
           make coq
