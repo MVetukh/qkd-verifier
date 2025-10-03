@@ -3,42 +3,50 @@ name: QKD Verification CI
 on: [push, pull_request]
 
 jobs:
-    verify:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v4
-      
-        - name: Set up Coq
-          run: sudo apt-get update && sudo apt-get install -y coq
-      
-        - name: Set up Python
-          uses: actions/setup-python@v4
-          with:
-            python-version: '3.8'
-          
-        - name: Install build deps (system)
-          run: sudo apt-get update && sudo apt-get install -y build-essential libblas-dev liblapack-dev
-          
-        - name: Install Python Dependencies
-          run: |
-            python -m pip install --upgrade pip setuptools wheel build
-            pip install -e ".[dev]" || \
-            (echo "Editable install failed — trying fallback requirements" && \
-             test -f requirements.txt && pip install -r requirements.txt || true && \
-             test -f requirements-dev.txt && pip install -r requirements-dev.txt || true)
-          
-        - name: Run Coq verification
-          run: |
-            # Переходим в директорию с Coq проектом
-            cd coq
-            # Проверяем, что _CoqProject на месте
-            if [ ! -f "_CoqProject" ]; then
-                echo "Error: _CoqProject not found in coq/"
-                exit 1
-            fi
-            # Генерируем Makefile.coq
-            coq_makefile -f _CoqProject -o Makefile.coq
-            # Проверяем, что файл создался
-            ls -la Makefile.coq
-            # Собираем проект
-            make -f Makefile.coq
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y coq coqmake build-essential libblas-dev liblapack-dev
+
+      - name: Install Python deps (editable)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Generate Coq instance (b92_inst.v + certificate.json)
+        run: |
+          make gen
+          test -f coq/Generated/b92_inst.v
+
+      - name: Python tests (generator smoke test)
+        run: |
+          pytest -q
+
+      - name: Quick-compile generated Coq file
+        run: |
+          make coq-quick
+
+      - name: Full Coq build (optional)
+        run: |
+          # убедимся, что _CoqProject существует
+          test -f coq/_CoqProject
+          make coq

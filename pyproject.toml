@@ -8,18 +8,20 @@ version = "0.1.0"
 description = "Automatic verifier qkd protocols Koashi method"
 authors = [{name = "MVetukh", email = "m.vetux@yandex.ru"}]
 readme = "README.md"
-license = "MIT"  # Исправлено: строка вместо таблицы
+license = "MIT"
 dependencies = [
     "pyyaml>=6.0",
-    "numpy>=1.21.0",
-    "jinja2>=3.0",  # Для шаблонов Coq-кода
+    "jinja2>=3.0",
+    "pydantic>=1.10",,     # <— ДОБАВЛЕНО: модели используют pydantic
+    "tomli>=2.0; python_version<'3.11'",  # <— ДОБАВЛЕНО: fallback для tomllib
+    # "numpy>=1.21.0",    # опционально: убрать, если не используете
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=6.0",
     "black",
-    "flake8", 
+    "flake8",
     "mypy",
     "pytest-cov",
 ]
@@ -39,4 +41,7 @@ warn_unused_configs = true
 disallow_untyped_defs = true
 
 [project.scripts]
-qkd-verify = "src.runner.coq_runner:main"
+# Вариант 1: CLI генерирует Coq-файл (по умолчанию B92)
+qkd-verify = "src.runner.generate_instance:main_cli"
+# Вариант 2 (дополнительно): отдельный запускчик coqc
+qkd-coqc = "src.runner.coq_runner:main"

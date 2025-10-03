@@ -1,0 +1,15 @@
+{
+  "delta_ph": 0.045,
+  "certificate": {
+    "solver": "stub",
+    "details": "no-duals-mvp",
+    "note": "replace with CVXPY duals later"
+  },
+  "delta_ph_interval": {
+    "lower": 0.044989999999999995,
+    "upper": 0.04501
+  },
+  "meta": {
+    "normalized": true
+  }
+}

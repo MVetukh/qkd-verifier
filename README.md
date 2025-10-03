@@ -67,5 +67,6 @@ make setup
 make coq
 
 # 5. Запуск тестового пайплайна верификации
-```
+
 make pipeline
+```

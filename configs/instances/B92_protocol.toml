@@ -98,20 +98,20 @@ detector_efficiency = 0.85
 [postprocessing]
 # sifting rule for B92: keep only conclusive detection outcomes (M0 or M1)
 sifting = "conclusive_only"
-# error correction scheme parameters (syndrome length r or target leak rate)
-error_correction:
-  # choice: "shannon", "ldpc", "cascade"
-  scheme = "ldpc"
-  # if using LDPC, target frame error rate after decoding
-  target_ferr = 1e-6
-  # assumed EC inefficiency above Shannon (f * H)
-  inefficiency_f = 1.1
 
-# privacy amplification parameters
+[postprocessing.error_correction]
+# choice: "shannon", "ldpc", "cascade"
+scheme = "ldpc"
+# if using LDPC, target frame error rate after decoding
+target_ferr = 1e-6
+# assumed EC inefficiency above Shannon (f * H)
+inefficiency_f = 1.1
+
 [postprocessing.privacy_amplification]
 method = "universal_hash"   # universal 2 hashing
 hash_family = "toeplitz"
 security_parameter = 1e-10
+
 
 #
 # --- Observed statistics (example values for a run) ---

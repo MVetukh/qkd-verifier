@@ -1,0 +1,30 @@
+(* Автогенерируемый файл: coq/Generated/b92_inst.v *)
+
+From Coq Require Import Reals Lra.
+Open Scope R_scope.
+
+Definition N : R := {{ N|coq_real }}.
+Definition p_psi0 : R := {{ p_psi0|coq_real }}.
+Definition p_psi1 : R := {{ p_psi1|coq_real }}.
+
+Definition delta_ph_lower : R := {{ delta_ph_lower|coq_real }}.
+Definition delta_ph_upper : R := {{ delta_ph_upper|coq_real }}.
+
+Definition eps_target : R := {{ epsilon|coq_real }}.
+
+(* На MVP-этапе эти леммы помечаем как Admitted.
+   Позже заменим на проверяемые доказательства через CoqInterval/рационализацию. *)
+
+Lemma delta_ph_bounds :
+  0 <= delta_ph_lower /\ delta_ph_lower <= delta_ph_upper /\ delta_ph_upper <= 1.
+Admitted.
+
+Lemma delta_ph_nonneg : 0 <= delta_ph_upper.
+Admitted.
+
+Lemma prob_norm_ok :
+  0 <= p_psi0 /\ 0 <= p_psi1 /\ p_psi0 + p_psi1 = 1.
+Admitted.
+
+Theorem b92_security_stub : 0 <= 1.
+Proof. lra. Qed.

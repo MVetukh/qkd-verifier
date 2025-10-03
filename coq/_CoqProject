@@ -1,1 +1,8 @@
--Q Theories QKD
+# логические префиксы (на будущее, когда появятся теории)
+-Q Theories/Core Core
+# сгенерированные файлы как дерево
+-R Generated Generated
+
+# можно явно перечислять файлы (когда появятся):
+Theories/Core/Prelude.v
+Generated/b92_inst.v
