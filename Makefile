@@ -9,15 +9,24 @@ COQTOP       := coqtop
 GENERATED_DIR:= $(COQDIR)/Generated
 
 # ---- Python / venv ----
+# ---- Python / venv ----
 PYTHON      := python3
 VENV_DIR    := .venv
 VENV_PYTHON := $(VENV_DIR)/bin/python3
 VENV_PIP    := $(VENV_DIR)/bin/pip
 
+# RUNPY: если есть .venv — используем его; иначе — системный python3 (для CI)
+ifeq ($(wildcard $(VENV_PYTHON)),)
+  RUNPY := $(PYTHON)
+else
+  RUNPY := $(VENV_PYTHON)
+endif
+
+
 # ---- Pipeline inputs ----
 CONFIG ?= configs/instances/B92_protocol.toml
 GEN_MODULE := src.runner.generate_instance
-GEN_ENTRY  := $(VENV_PYTHON) -m $(GEN_MODULE)
+GEN_ENTRY  := $(RUNPY) -m $(GEN_MODULE)
 
 # ---- Coq VFILES discovery ----
 VCORE  := $(shell find $(COQDIR)/Theories -type f -name '*.v' 2>/dev/null)
@@ -92,15 +101,14 @@ print('Verification result:', 'SUCCESS' if run_coq_verification('Generated/b92_i
 
 # ---- Dev helpers ----
 test-py:
-	$(VENV_PYTHON) -m pytest tests/ -v
+	$(RUNPY) -m pytest tests/ -v
 
 format:
-	$(VENV_PYTHON) -m black src/ tests/
-
+	$(RUNPY) -m black src/ tests/
 lint:
 	@echo "Running code quality checks..."
-	$(VENV_PYTHON) -m flake8 src/
-	$(VENV_PYTHON) -m mypy src/
+	$(RUNPY) -m flake8 src/
+	$(RUNPY) -m mypy src/
 
 # ---- Cleaning ----
 clean:
