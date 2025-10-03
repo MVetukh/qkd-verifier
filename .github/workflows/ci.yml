@@ -41,7 +41,7 @@ jobs:
       # Юнит-тест генератора (pytest)
       - name: Python tests (generator smoke test)
         run: |
-          pytest -q
+          PYTHONPATH=. pytest -q
 
       # Быстрая компиляция одного файла без Makefile.coq
       - name: Quick-compile generated Coq file
